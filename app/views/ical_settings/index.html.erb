@@ -1,0 +1,47 @@
+<h2>iCal設定</h2>
+
+<% unless @ical_setting.new_record? %>
+  <% button_label = "更新" %>
+  <div class="box tabular">
+    <h3><%=l(:label_current_ical_setting)%></h3>
+    <div><input type = "text" value="<%=generate_url(@ical_setting.token)%>" size = "100"></div>
+    <ul>
+      <li><%= link_to "access keyを更新", :controller => "ical_settings", :action => "update_key" %></li>
+      <li><%= link_to "access keyを削除", :controller => "ical_settings", :action => "destroy" %></li>
+    </ul>
+  </div>
+<% else %>
+  <% button_label = "作成" %>
+  <p>iCal設定をしてください。</p>
+<% end  %>
+
+
+
+<% content_for :sidebar do %>
+  <h3>設定</h3>
+  <%- form_for(:ical_setting, :url => {:controller => "ical_settings", :action => "update"}, :html => {:method => :put}) do |f| %>
+    <table>
+      <tr>
+        <th width="30%">アラート</th>
+        <td><%= f.select :alerm, IcalSetting::FLAGS %></td>
+      </tr>
+      <tr>
+        <th>通知</th>
+        <td>
+          <%= f.text_field :time_number,:size=>2 %>
+          <%= f.select :time_section, IcalSetting::SECTIONS %> 前に通知する(1-100)
+        </td>
+      </tr>
+      <tr>
+        <th>過去分</th>
+        <td><%= f.text_field :past,:size=>2 %>日分(1-30)</td>
+      <tr>
+        <th>未来分</th>
+        <td><%= f.text_field :future,:size=>2 %>日分(1-30)</td>
+      </tr>
+      <tr>
+        <td colspan="2"><%= f.submit button_label %></td>
+      </tr>
+    </table>
+  <% end -%>
+<% end %>
