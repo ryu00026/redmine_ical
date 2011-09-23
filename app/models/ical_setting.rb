@@ -2,16 +2,16 @@
 class IcalSetting < ActiveRecord::Base
   unloadable
 
-  validates_inclusion_of :past, :in => 1..30, :allow_nil => true
-  validates_inclusion_of :future, :in => 1..30, :allow_nil => true
+  #validates_inclusion_of :past, :in => 1..30, :allow_nil => true
+  #validates_inclusion_of :future, :in => 1..30, :allow_nil => true
   validates_inclusion_of :time_number, :in => 1..100, :allow_nil => true
   validates_inclusion_of :time_section , :in=> %w(M H D)
   validates_inclusion_of :time_section , :in=> %w(M H D)
-  validates_numericality_of :past
-  validates_numericality_of :future
+  #validates_numericality_of :past
+  #validates_numericality_of :future
   validates_numericality_of :time_number
-  validates_presence_of :past
-  validates_presence_of :future
+  #validates_presence_of :past
+  #validates_presence_of :future
   validates_presence_of :time_section
   FLAGS  = [["ON",true],["OFF",false]]
   SECTIONS = [["分","M"],["時間","H"],["日","D"]]

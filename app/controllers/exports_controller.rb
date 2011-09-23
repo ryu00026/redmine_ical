@@ -14,9 +14,9 @@ class ExportsController < ApplicationController
   end
 
   def generate_ical(ical_setting, user)
-    today = Date.today
-    startdt = today - ical_setting.past
-    enddt = today + ical_setting.future
+    #today = Date.today
+    #startdt = today - ical_setting.past
+    #enddt = today + ical_setting.future
 
     #watchers = []
     #watch_users = []
@@ -28,7 +28,9 @@ class ExportsController < ApplicationController
     #issues = Issue.find(:all, :conditions => ["start_date >= ? AND due_date <= ? AND (assigned_to_id = ? OR id IN (?) )", startdt, enddt, user.id, watchers.uniq])
 
     # 未完了で自分の担当のチケットを取得
-    issues = Issue.find(:all, :joins => "LEFT JOIN issue_statuses AS st ON issues.status_id = st.id", :conditions => ["issues.start_date <= ? AND issues.due_date <= ? AND issues.assigned_to_id = ? AND st.is_closed = ?", startdt, enddt, user.id, false])
+    #issues = Issue.find(:all, :joins => "LEFT JOIN issue_statuses AS st ON issues.status_id = st.id", :conditions => ["issues.start_date <= ? AND issues.due_date <= ? AND issues.assigned_to_id = ? AND st.is_closed = ?", startdt, enddt, user.id, false])
+    issues = Issue.find(:all, :joins => "LEFT JOIN issue_statuses AS st ON issues.status_id = st.id", :conditions => ["issues.assigned_to_id = ? AND st.is_closed = ?", user.id, false])
+
 
     cal = Icalendar::Calendar.new
     # タイムゾーン (VTIMEZONE) を作成
