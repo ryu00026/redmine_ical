@@ -6,8 +6,8 @@ Redmine::Plugin.register :redmine_ical do
   author 'Ryuichi Kato'
   description 'iCal Support for Redmine'
   version '0.0.1'
-  #url 'http://example.com/path/to/plugin'
-  #author_url 'http://example.com/about'
+  url 'https://github.com/ryu00026/redmine_ical'
+  author_url 'http://d.hatena.ne.jp/ryu00026/'
 
 
   menu :account_menu,
