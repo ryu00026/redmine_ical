@@ -25,10 +25,10 @@ class ExportsController < ApplicationController
     #  watchers << watcher.watchable_id
     #  watch_users << watcher.user
     #end
-    #issues = Issue.find(:all, :conditions => ["start_date >= ? AND due_date <= ? AND (priority_id = ? OR id IN (?) )", startdt, enddt, user.id, watchers.uniq])
+    #issues = Issue.find(:all, :conditions => ["start_date >= ? AND due_date <= ? AND (assigned_to_id = ? OR id IN (?) )", startdt, enddt, user.id, watchers.uniq])
 
     # 未完了で自分の担当のチケットを取得
-    issues = Issue.find(:all, :joins => "LEFT JOIN issue_statuses AS st ON issues.status_id = st.id", :conditions => ["issues.start_date >= ? AND issues.due_date <= ? AND issues.priority_id = ? AND st.is_closed = ?", startdt, enddt, user.id, false])
+    issues = Issue.find(:all, :joins => "LEFT JOIN issue_statuses AS st ON issues.status_id = st.id", :conditions => ["issues.start_date <= ? AND issues.due_date <= ? AND issues.assigned_to_id = ? AND st.is_closed = ?", startdt, enddt, user.id, false])
 
     cal = Icalendar::Calendar.new
     # タイムゾーン (VTIMEZONE) を作成
@@ -68,8 +68,8 @@ class ExportsController < ApplicationController
       #event.klass("PRIVATE")
       # 作成者が参加者の中にいればAtendeeではなくorganizerにする
 #       watch_users.each do |watcher|
-#         if issue.priority_id
-#           if watcher.id == issue.priority_id
+#         if issue.assigned_to_id
+#           if watcher.id == issue.assigned_to_id
 #             event.custom_property("ORGANIZER;CN=#{watcher.name}", "MAILTO:#{watcher.mail}")
 #             event.custom_property("ATTENDEE;ROLE=CHAIR;CN=#{watcher.name}", "MAILTO:#{watcher.mail}")
 #           else
@@ -88,10 +88,10 @@ class ExportsController < ApplicationController
 #       end
 
       Watcher.find(:all,
-        :joins => "LEFT JOIN users ON watchers.user_id = users.id"
-        :conditions => ["watchers.watchable_type = ? AND watchers.watchable_id = ?", "Issue", issue.id]).each do  |watcher|
+        :joins => "LEFT JOIN users ON watchers.user_id = users.id",
+        :conditions => ["watchers.watchable_type = ? AND watchers.watchable_id = ?", "Issue", issue.id]).each do |watcher|
         user = watcher.user
-        if user.id == issue.priority_id
+        if user.id == issue.assigned_to_id
           event.custom_property("ORGANIZER;CN=#{user.name}", "MAILTO:#{user.mail}")
           event.custom_property("ATTENDEE;ROLE=CHAIR;CN=#{user.name}", "MAILTO:#{user.mail}")
         else
