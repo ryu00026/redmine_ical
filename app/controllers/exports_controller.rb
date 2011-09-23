@@ -6,7 +6,6 @@ class ExportsController < ApplicationController
   def ical
     ical_setting = IcalSetting.find(:first, :conditions => [" token = ? ", params[:id]])
     user = User.find(ical_setting.user_id)
-
      if ical_setting
       render :text => generate_ical(ical_setting, user)
     else
@@ -18,15 +17,18 @@ class ExportsController < ApplicationController
     today = Date.today
     startdt = today - ical_setting.past
     enddt = today + ical_setting.future
-    watchers = []
-    watch_users = []
-    Watcher.find(:all,
-      :joins => "LEFT JOIN users ON watchers.user_id = users.id", :conditions => ["watchers.user_id = ? AND watchers.watchable_type = ?", user.id, "Issue"]).each do  |watcher|
-      watchers << watcher.watchable_id
-      watch_users << watcher.user
-    end
 
-    issues = Issue.find(:all, :conditions => ["start_date >= ? AND due_date <= ? AND (priority_id = ? OR id IN (?) )", startdt, enddt, user.id, watchers.uniq])
+    #watchers = []
+    #watch_users = []
+    #Watcher.find(:all,
+    #  :joins => "LEFT JOIN users ON watchers.user_id = users.id", :conditions => ["watchers.user_id = ? AND watchers.watchable_type = ?", user.id, "Issue"]).each do  |watcher|
+    #  watchers << watcher.watchable_id
+    #  watch_users << watcher.user
+    #end
+    #issues = Issue.find(:all, :conditions => ["start_date >= ? AND due_date <= ? AND (priority_id = ? OR id IN (?) )", startdt, enddt, user.id, watchers.uniq])
+
+    # 未完了で自分の担当のチケットを取得
+    issues = Issue.find(:all, :joins => "LEFT JOIN issue_statuses AS st ON issues.status_id = st.id", :conditions => ["issues.start_date >= ? AND issues.due_date <= ? AND issues.priority_id = ? AND st.is_closed = ?", startdt, enddt, user.id, false])
 
     cal = Icalendar::Calendar.new
     # タイムゾーン (VTIMEZONE) を作成
@@ -64,27 +66,40 @@ class ExportsController < ApplicationController
       event.uid("#{issue.id}@example.com") #Defines a persistent, globally unique id for this item
 
       #event.klass("PRIVATE")
-
       # 作成者が参加者の中にいればAtendeeではなくorganizerにする
-      watch_users.each do |watcher|
-        if issue.priority_id
-          if watcher.id == issue.priority_id
-            event.custom_property("ORGANIZER;CN=#{watcher.name}", "MAILTO:#{watcher.mail}")
-            event.custom_property("ATTENDEE;ROLE=CHAIR;CN=#{watcher.name}", "MAILTO:#{watcher.mail}")
-          else
-            attendee = Attendee.new(watcher.mail, {"CN" => watcher.name})
-            event.custom_property attendee.property_name, attendee.value
-          end
+#       watch_users.each do |watcher|
+#         if issue.priority_id
+#           if watcher.id == issue.priority_id
+#             event.custom_property("ORGANIZER;CN=#{watcher.name}", "MAILTO:#{watcher.mail}")
+#             event.custom_property("ATTENDEE;ROLE=CHAIR;CN=#{watcher.name}", "MAILTO:#{watcher.mail}")
+#           else
+#             attendee = Attendee.new(watcher.mail, {"CN" => watcher.name})
+#             event.custom_property attendee.property_name, attendee.value
+#           end
+#         else
+#           if watcher.id == issue.author_id
+#             event.custom_property("ORGANIZER;CN=#{watcher.name}", "MAILTO:#{watcher.mail}")
+#             event.custom_property("ATTENDEE;ROLE=CHAIR;CN=#{watcher.name}", "MAILTO:#{watcher.mail}")
+#           else
+#             attendee = Attendee.new(watcher.mail, {"CN" => watcher.name})
+#             event.custom_property attendee.property_name, attendee.value
+#           end
+#         end
+#       end
+
+      Watcher.find(:all,
+        :joins => "LEFT JOIN users ON watchers.user_id = users.id"
+        :conditions => ["watchers.watchable_type = ? AND watchers.watchable_id = ?", "Issue", issue.id]).each do  |watcher|
+        user = watcher.user
+        if user.id == issue.priority_id
+          event.custom_property("ORGANIZER;CN=#{user.name}", "MAILTO:#{user.mail}")
+          event.custom_property("ATTENDEE;ROLE=CHAIR;CN=#{user.name}", "MAILTO:#{user.mail}")
         else
-          if watcher.id == issue.author_id
-            event.custom_property("ORGANIZER;CN=#{watcher.name}", "MAILTO:#{watcher.mail}")
-            event.custom_property("ATTENDEE;ROLE=CHAIR;CN=#{watcher.name}", "MAILTO:#{watcher.mail}")
-          else
-            attendee = Attendee.new(watcher.mail, {"CN" => watcher.name})
-            event.custom_property attendee.property_name, attendee.value
-          end
+          attendee = Attendee.new(user.mail, {"CN" => user.name})
+          event.custom_property attendee.property_name, attendee.value
         end
       end
+
 
       # 設定値を見る
       if ical_setting
