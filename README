@@ -1,4 +1,0 @@
-gem install icalendar --no-ri --no-rdoc
-cd RAILS_ROOT
-rake db:migrate_plugins
-
