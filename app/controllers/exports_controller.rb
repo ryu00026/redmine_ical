@@ -5,8 +5,8 @@ class ExportsController < ApplicationController
   skip_before_filter :check_if_login_required
   def ical
     ical_setting = IcalSetting.find(:first, :conditions => [" token = ? ", params[:id]])
-    user = User.find(ical_setting.user_id)
-     if ical_setting
+    if ical_setting
+      user = User.find(ical_setting.user_id)
       render :text => generate_ical(ical_setting, user)
     else
       render :text => "403", :status => :forbidden
