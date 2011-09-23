@@ -3,6 +3,8 @@ require "icalendar"
 class ExportsController < ApplicationController
   unloadable
   skip_before_filter :check_if_login_required
+  SALT_CHARSET = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+
   def ical
     ical_setting = IcalSetting.find(:first, :conditions => [" token = ? ", params[:id]])
     if ical_setting
@@ -12,6 +14,11 @@ class ExportsController < ApplicationController
     else
       render :text => "403", :status => :forbidden
     end
+  end
+
+  def set_uid(id)
+    salt = "" << SALT_CHARSET[rand 64] << SALT_CHARSET[rand 64]
+    "#{id.to_s.crypt(salt)}@example.com"
   end
 
   def generate_ical(ical_setting, user)
@@ -66,8 +73,8 @@ class ExportsController < ApplicationController
       event.url("#{request.protocol}#{request.host_with_port}/issues/#{issue.id}")
       event.created(issue.created_on.strftime("%Y%m%dT%H%M%SZ"))
       event.last_modified(issue.updated_on.strftime("%Y%m%dT%H%M%SZ"))
-      event.uid("#{issue.id}@example.com") #Defines a persistent, globally unique id for this item
-
+      #event.uid("#{issue.id}@example.com") #Defines a persistent, globally unique id for this item
+      event.uid(set_uid(issue.id)) #Defines a persistent, globally unique id for this item
       #event.klass("PRIVATE")
       # 作成者が参加者の中にいればAtendeeではなくorganizerにする
 #       watch_users.each do |watcher|
