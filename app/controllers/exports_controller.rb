@@ -7,7 +7,8 @@ class ExportsController < ApplicationController
     ical_setting = IcalSetting.find(:first, :conditions => [" token = ? ", params[:id]])
     if ical_setting
       user = User.find(ical_setting.user_id)
-      render :text => generate_ical(ical_setting, user)
+      send_data generate_ical(ical_setting, user), :type => 'text/calendar; charset=utf-8'
+      #render :text => generate_ical(ical_setting, user)
     else
       render :text => "403", :status => :forbidden
     end
