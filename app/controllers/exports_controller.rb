@@ -89,17 +89,14 @@ class ExportsController < ApplicationController
 #         end
 #       end
 
+      event.custom_property("ORGANIZER;CN=#{user.name}", "MAILTO:#{user.mail}")
+      event.custom_property("ATTENDEE;ROLE=CHAIR;CN=#{user.name}", "MAILTO:#{user.mail}")
       Watcher.find(:all,
         :joins => "LEFT JOIN users ON watchers.user_id = users.id",
         :conditions => ["watchers.watchable_type = ? AND watchers.watchable_id = ?", "Issue", issue.id]).each do |watcher|
         user = watcher.user
-        if user.id == issue.assigned_to_id
-          event.custom_property("ORGANIZER;CN=#{user.name}", "MAILTO:#{user.mail}")
-          event.custom_property("ATTENDEE;ROLE=CHAIR;CN=#{user.name}", "MAILTO:#{user.mail}")
-        else
-          attendee = Attendee.new(user.mail, {"CN" => user.name})
-          event.custom_property attendee.property_name, attendee.value
-        end
+        attendee = Attendee.new(user.mail, {"CN" => user.name})
+        event.custom_property attendee.property_name, attendee.value
       end
 
 
