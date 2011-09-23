@@ -7,7 +7,7 @@
 
 == How to Use
 redmineの右上にiCal設定と出てくるので
-そこをクリックして過去分と未来分なのどの設定をしてください
+そこをクリックして初期設定を行なってください
 
 アクセスキー付きURLが発行されます
 
@@ -18,5 +18,5 @@ http://username:password@your.domain/exports/ical/XXXXXXXXXXXXX
 でアクセス可能です
 
 == TODO
-# 国際化
-# watcherに入れてるissueも閲覧できるようにする？
+- 国際化
+- watcherに入れてるissueも閲覧できるようにする？
