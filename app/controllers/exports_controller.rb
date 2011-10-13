@@ -58,6 +58,8 @@ class ExportsController < ApplicationController
     cal.custom_property("X-WR-TIMEZONE","Asia/Tokyo")
     cal.prodid("Redmine iCal Plugin")
     issues.each do |issue|
+      next if issue.start_date.blank?
+      next if issue.due_date.blank?
       s  = issue.start_date
       e  = issue.due_date
 
