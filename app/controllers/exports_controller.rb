@@ -5,8 +5,8 @@ class ExportsController < ApplicationController
   skip_before_filter :check_if_login_required
   SALT_CHARSET = "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
 
-  def ical
-    ical_setting = IcalSetting.find(:first, :conditions => [" token = ? ", params[:id]])
+  def show
+    ical_setting = IcalSetting.where(:token => params[:id]).first
     if ical_setting
       user = User.find(ical_setting.user_id)
       send_data generate_ical(ical_setting, user), :type => 'text/calendar; charset=utf-8'
