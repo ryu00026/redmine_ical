@@ -5,7 +5,7 @@ RedmineApp::Application.routes.draw do
     end
   end
   resources :exports do
-    collection do
+    member do
       get "ical"
     end
   end
