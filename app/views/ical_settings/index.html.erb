@@ -19,7 +19,7 @@
 
 <% content_for :sidebar do %>
   <h3>設定</h3>
-  <%- form_for(:ical_setting, :url => {:controller => "ical_settings", :action => "update"}, :html => {:method => :put}) do |f| %>
+  <%= form_for(:ical_setting, :url => {:controller => "ical_settings", :action => "update"}, :html => {:method => :put}) do |f| %>
     <table>
       <tr>
         <th width="30%">アラート</th>
